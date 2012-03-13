@@ -38,6 +38,7 @@ let keyword_table =
     "and", AND;
     "as", AS;
     "assert", ASSERT;
+    "assert_lwt", ASSERT;
     "begin", BEGIN;
     "class", CLASS;
     "constraint", CONSTRAINT;
@@ -50,6 +51,7 @@ let keyword_table =
     "external", EXTERNAL;
     "false", FALSE;
     "for", FOR;
+    "for_lwt", FOR;
     "fun", FUN;
     "function", FUNCTION;
     "functor", FUNCTOR;
@@ -60,7 +62,9 @@ let keyword_table =
     "initializer", INITIALIZER;
     "lazy", LAZY;
     "let", LET;
+    "lwt", LET;
     "match", MATCH;
+    "match_lwt", MATCH;
     "method", METHOD;
     "module", MODULE;
     "mutable", MUTABLE;
@@ -78,11 +82,13 @@ let keyword_table =
     "to", TO;
     "true", TRUE;
     "try", TRY;
+    "try_lwt", TRY;
     "type", TYPE;
     "val", VAL;
     "virtual", VIRTUAL;
     "when", WHEN;
     "while", WHILE;
+    "while_lwt", WHILE;
     "with", WITH;
 
     "mod", INFIXOP3("mod");

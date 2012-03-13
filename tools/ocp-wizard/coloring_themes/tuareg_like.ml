@@ -66,7 +66,7 @@ let token2face token before after =
     | LIDENT ("ref" | "not")
         -> `typerex `operator
 
-    | LIDENT ("parser" | "raise" | "failwith" | "exit")
+    | LIDENT ("parser" | "raise" | "raise_lwt" | "failwith" | "exit")
         -> `font_lock `keyword
 
     | UNDERSCORE | DOT | BACKQUOTE
