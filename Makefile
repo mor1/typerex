@@ -104,7 +104,7 @@ clean-temps:
 
 distclean: clean
 	-$(OCPBUILD) -distclean
-	rm -rf _obuild ocp-build.root ocp-build.root.old
+	rm -rf _obuild ocp-build.root ocp-build.root.old \
 	Makefile.config ocp-typerex.ocp emacs.append
 
 # update boot/ with and check it works
