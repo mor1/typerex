@@ -80,3 +80,7 @@ libs/ocamlpro/yacclib/yacclib_parser.mli
 tools/ocp-wizard/emacs/ocp-wizard-plugin.el
 tools/ocp-ide/emacs/typerex.el*
 libs/ocamlpro/typerex-config/typerex_config.ml
+
+emacs.append
+libs/ocamlpro/system/ocplib-system.ocp
+tools/ocp-typerex-ide/emacs/typerex-config.el
