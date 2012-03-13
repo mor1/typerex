@@ -1103,7 +1103,7 @@ Regexp match data 0 points to the chars."
         '("module" "class" "functor" "object" "type" "val" "inherit"
           "include" "virtual" "constraint" "exception" "external" "open"
           "method" "and" "initializer" "to" "downto" "do" "done" "else"
-          "begin" "end" "let" "in" "then" "with"))
+          "begin" "end" "let" "lwt" "in" "then" "with"))
   (setq abbrevs-changed nil))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1371,10 +1371,10 @@ possible."
 
 (defconst typerex-keyword-regexp
   (concat (typerex-ro "object" "initializer" "and" "constraint" "class"
-                     "match" "module" "method" "mutable" "sig" "struct" "begin"
-                     "else" "exception" "external" "to" "then" "try" "type"
-                     "virtual" "val" "while" "when" "with" "if" "in" "inherit"
-                     "for" "fun" "functor" "function" "let" "do" "downto"
+                     "match" "match_lwt" "module" "method" "mutable" "sig" "struct" "begin"
+                     "else" "exception" "external" "to" "then" "try" "try_lwt" "type"
+                     "virtual" "val" "while" "while_lwt" "when" "with" "if" "in" "inherit"
+                     "for" "for_lwt" "fun" "functor" "function" "let" "lwt" "do" "downto"
                      "parse" "parser" "rule" "of")
           "\\|->\\|[;,|]")
   "Regexp for all recognized keywords.")
@@ -1447,7 +1447,7 @@ For synchronous programming.")
     typerex-matching-kwop-regexp))
 
 (defconst typerex-block-regexp
-  (concat (typerex-ro "for" "while" "do" "if" "begin" "sig" "struct" "object")
+  (concat (typerex-ro "for" "for_lwt" "while" "while_lwt" "do" "if" "begin" "sig" "struct" "object")
           "\\|[][(){}]\\|\\*)"))
 
 (defconst typerex-find-kwop-regexp
@@ -1455,7 +1455,7 @@ For synchronous programming.")
 
 (defconst typerex-find-kwop-regexp-ls3
   (concat typerex-find-kwop-regexp "\\|"
-          (typerex-ro "where" "automaton" "present" "match")))
+          (typerex-ro "where" "automaton" "present" "match" "match_lwt")))
 
 (defun typerex-give-find-kwop-regexp ()
   (if (typerex-editing-ls3)
@@ -1464,7 +1464,7 @@ For synchronous programming.")
 
 (defconst typerex-governing-phrase-regexp
   (typerex-ro "val" "type" "method" "module" "constraint" "class" "inherit"
-             "initializer" "external" "exception" "open" "let" "object"
+             "initializer" "external" "exception" "open" "let" "lwt" "object"
              "include")
   "Regexp matching ocp phrase delimitors.")
 
@@ -1478,7 +1478,9 @@ For synchronous programming.")
     ("begin" . typerex-begin-indent)
     (".<" . typerex-begin-indent)
     ("for" . typerex-for-while-indent)
+    ("for_lwt" . typerex-for-while-indent)
     ("while" . typerex-for-while-indent)
+    ("while_lwt" . typerex-for-while-indent)
     ("do" . typerex-do-indent)
     ("val" . typerex-val-indent)
     ("fun" . typerex-fun-indent)
@@ -1486,8 +1488,11 @@ For synchronous programming.")
     ("then" . typerex-if-then-else-indent)
     ("else" . typerex-if-then-else-indent)
     ("let" . typerex-let-indent)
+    ("lwt" . typerex-let-indent)
     ("match" . typerex-match-indent)
+    ("match_lwt" . typerex-match-indent)
     ("try" . typerex-try-indent)
+    ("try_lwt" . typerex-try-indent)
     ("rule" . typerex-rule-indent)
 
     ;; Case match keywords
@@ -1604,12 +1609,12 @@ Returns the actual text of the word, if found."
 ;; Static regexps
 (defconst typerex-find-and-match-regexp
   (concat (typerex-ro "do" "done" "else" "end" "in" "then" "down" "downto"
-                     "for" "while" "do" "if" "begin" "sig" "struct" "class"
-                     "rule" "exception" "let" "in" "type" "val" "module")
+                     "for" "for_lwt" "while" "while_lwt" "do" "if" "begin" "sig" "struct" "class"
+                     "rule" "exception" "let" "lwt" "in" "type" "val" "module")
           "\\|[][(){}]\\|\\*)"))
 (defconst typerex-find-phrase-beginning-regexp
   (concat (typerex-ro "end" "type" "module" "sig" "struct" "class"
-                     "exception" "open" "let")
+                     "exception" "open" "let" "lwt")
           "\\|^#[ \t]*[a-z][_a-z]*\\>\\|;;"))
 (defconst typerex-find-phrase-beginning-and-regexp
   (concat "\\<\\(and\\)\\>\\|" typerex-find-phrase-beginning-regexp))
@@ -1632,35 +1637,35 @@ Gathered here for memoization and dynamic reconfiguration purposes."
   (setq
    typerex-find-comma-match-regexp
     (typerex-make-find-kwop-regexp
-     (concat (typerex-ro "and" "match" "begin" "else" "exception" "then" "try"
-                        "with" "or" "fun" "function" "let" "do")
+     (concat (typerex-ro "and" "match" "match_lwt" "begin" "else" "exception" "then" "try" "try_lwt"
+                        "with" "or" "fun" "function" "let" "lwt" "do")
              "\\|->\\|[[{(]"))
    typerex-find-with-match-regexp
     (typerex-make-find-kwop-regexp
-     (concat (typerex-ro "match" "try" "module" "begin" "with" "type")
+     (concat (typerex-ro "match" "match_lwt" "try" "try_lwt" "module" "begin" "with" "type")
              "\\|[[{(]"))
    typerex-find-in-match-regexp
-    (typerex-make-find-kwop-regexp (typerex-ro "let" "open"))
+    (typerex-make-find-kwop-regexp (typerex-ro "let" "lwt" "open"))
    typerex-find-else-match-regexp
     (typerex-make-find-kwop-regexp ";")
    typerex-find-do-match-regexp
     (typerex-make-find-kwop-regexp "->")
    typerex-find-=-match-regexp
     (typerex-make-find-kwop-regexp
-     (concat (typerex-ro "val" "let" "method" "module" "type" "class" "when"
+     (concat (typerex-ro "val" "let" "lwt" "method" "module" "type" "class" "when"
                         "if" "in" "do")
              "\\|="))
    typerex-find-pipe-match-regexp
     (typerex-make-find-kwop-regexp (typerex-give-match-pipe-kwop-regexp))
    typerex-find-arrow-match-regexp
     (typerex-make-find-kwop-regexp
-     (concat (typerex-ro "external" "type" "val" "method" "let" "with" "fun"
+     (concat (typerex-ro "external" "type" "val" "method" "let" "lwt" "with" "fun"
                         "function" "functor" "class" "parser")
              "\\|[|;]"))
    typerex-find-semicolon-match-regexp
     (typerex-make-find-kwop-regexp
      (concat ";" typerex-no-more-code-this-line-regexp "\\|->\\|"
-             (typerex-ro "let" "method" "with" "try" "initializer")))
+             (typerex-ro "let" "lwt" "method" "with" "try" "try_lwt" "initializer")))
    typerex-find-phrase-indentation-regexp
     (typerex-make-find-kwop-regexp
      (concat typerex-governing-phrase-regexp "\\|" (typerex-ro "and" "every")))
@@ -1679,7 +1684,7 @@ Gathered here for memoization and dynamic reconfiguration purposes."
     (concat typerex-find-comma-match-regexp "\\|=")
    typerex-find-monadic-match-regexp
     (concat typerex-block-regexp "\\|\\([;=]\\)\\|\\(->\\)\\|"
-            (typerex-ro "val" "let" "method" "module" "type" "class" "when"
+            (typerex-ro "val" "let" "lwt" "method" "module" "type" "class" "when"
                        "if" "in" "do" "done" "end"))))
 
 (defun typerex-strip-trailing-whitespace (string)
@@ -1866,7 +1871,9 @@ If found, return the actual text of the keyword or operator."
               ((string= kwop2 "and")
                (typerex-find-and-match))
               ((and (string= kwop "module")
-                    (string= kwop2 "let"))
+                    (string= kwop2 "let")
+                    (string= kwop2 "lwt")
+                                         )
                kwop2)
               (t (goto-char old-point) kwop))))
      (t kwop))))
@@ -1901,7 +1908,7 @@ If found, return the actual text of the keyword or operator."
     (looking-at typerex-if-when-regexp)))
 
 (defconst typerex-captive-regexp
-  (typerex-ro "let" "if" "when" "module" "type" "class"))
+  (typerex-ro "let" "lwt" "if" "when" "module" "type" "class"))
 (defun typerex-captive-= ()
   (save-excursion
     (typerex-find-=-match)
@@ -2038,7 +2045,12 @@ If found, return the actual text of the keyword or operator."
         (+ (typerex-paren-or-indentation-column) typerex-in-indent))
        ((string= kwop "let")
         (+ (current-column) typerex-let-indent))
+       ((string= kwop "lwt")
+        (+ (current-column) typerex-let-indent))
        ((string= kwop "try")
+        (forward-char 3) (skip-syntax-forward " ")
+        (current-column))
+       ((string= kwop "try_lwt")
         (forward-char 3) (skip-syntax-forward " ")
         (current-column))
        (t (typerex-paren-or-indentation-indent)))
@@ -2052,7 +2064,7 @@ If found, return the actual text of the keyword or operator."
      (setq ,kwop (typerex-find-and-match))))
 
 (defconst typerex-phrase-regexp-1 (typerex-ro "module" "type"))
-(defconst typerex-phrase-regexp-2 (typerex-ro "and" "let" "module" "with"))
+(defconst typerex-phrase-regexp-2 (typerex-ro "and" "let" "lwt" "module" "with"))
 (defconst typerex-phrase-regexp-3
   (typerex-ro "and" "end" "every" "in" "with"))
 (defun typerex-find-phrase-indentation (&optional phrase-break)
@@ -2105,11 +2117,24 @@ If found, return the actual text of the keyword or operator."
                               (not (typerex-looking-at-internal-let))))))
              (goto-char curr)
              (typerex-find-phrase-indentation phrase-break))
+            ((and (string= kwop "in")
+                  (not (save-excursion
+                         (setq tmpkwop (typerex-find-in-match))
+                         (typerex-reset-and-kwop tmpkwop)
+                         (setq curr (point))
+                         (and (string= tmpkwop "lwt")
+                              (not (typerex-looking-at-internal-let))))))
+             (goto-char curr)
+             (typerex-find-phrase-indentation phrase-break))
             ((typerex-at-phrase-break-p)
              (end-of-line)
              (typerex-skip-blank-and-comments)
              (current-column))
             ((string= kwop "let")
+             (if (typerex-looking-at-internal-let)
+                 (typerex-find-phrase-indentation phrase-break)
+                 (current-column)))
+            ((string= kwop "lwt")
              (if (typerex-looking-at-internal-let)
                  (typerex-find-phrase-indentation phrase-break)
                  (current-column)))
@@ -2198,8 +2223,8 @@ Returns t iff skipped to indentation."
 
 (defconst typerex-internal-let-regexp
   (concat "[[({;=]\\|"
-           (typerex-ro "begin" "open" "if" "in" "do" "try" "then" "else"
-                      "match" "while" "when")))
+           (typerex-ro "begin" "open" "if" "in" "do" "try" "try_lwt" "then" "else"
+                      "match" "match_lwt" "while" "while_lwt" "when")))
 (defun typerex-looking-at-internal-let ()
   (save-excursion
     (typerex-find-meaningful-word)
@@ -2210,7 +2235,7 @@ Returns t iff skipped to indentation."
          (or (looking-at typerex-internal-let-regexp)
              (looking-at typerex-operator-regexp)))))
 
-(defconst typerex-false-module-regexp (typerex-ro "and" "let" "with"))
+(defconst typerex-false-module-regexp (typerex-ro "and" "let" "lwt" "with"))
 (defun typerex-looking-at-false-module ()
   (save-excursion
     (typerex-find-meaningful-word)
@@ -2334,7 +2359,7 @@ Returns t iff skipped to indentation."
           (goto-char matching-pos)
           (typerex-find-arrow-match) ; matching `val' or `let'
           (+ (current-column) typerex-val-indent))
-         ((or (string= matching-kwop "val") (string= matching-kwop "let"))
+         ((or (string= matching-kwop "val") (string= matching-kwop "let") (string= matching-kwop "lwt"))
           (+ (current-column) typerex-val-indent))
          ((string= matching-kwop "|")
           (goto-char matching-pos)
@@ -2370,7 +2395,8 @@ Returns t iff skipped to indentation."
            (typerex-find-arrow-match)
            (+ (current-column) typerex-default-indent typerex-case-arrow-extra-indent))
           ((or (string= kwop "val")
-               (string= kwop "let"))
+               (string= kwop "let")
+               (string= kwop "lwt"))
            (goto-char pos)
            (+ (current-column) typerex-val-indent))
           ((string= kwop "type")
@@ -2451,7 +2477,7 @@ Returns t iff skipped to indentation."
              (typerex-indent-from-paren leading-operator start-pos)
            (+ typerex-default-indent
               (typerex-indent-from-paren leading-operator start-pos))))
-        ((or (string= kwop "let") (string= kwop "and"))
+        ((or (string= kwop "let") (string= kwop "lwt") (string= kwop "and"))
          (typerex-back-to-paren-or-indentation)
          (+ (typerex-paren-or-indentation-indent)
             (typerex-assoc-indent kwop t)))
@@ -2496,7 +2522,7 @@ Returns t iff skipped to indentation."
               (typerex-assoc-indent kwop t)))))
 
 (defconst typerex-=-indent-regexp-1
-  (typerex-ro "val" "let" "method" "module" "class" "when" "for" "if" "do"))
+  (typerex-ro "val" "let" "lwt" "method" "module" "class" "when" "for" "for_lwt" "if" "do"))
 
 (defun typerex-compute-=-indent (start-pos)
   (let ((current-column-module-type nil) (kwop1 (typerex-find-=-match))
@@ -2542,7 +2568,7 @@ Returns t iff skipped to indentation."
   (current-column))
 
 (defconst typerex-definitions-regexp
-  (typerex-ro "and" "val" "type" "module" "class" "exception" "let")
+  (typerex-ro "and" "val" "type" "module" "class" "exception" "let" "lwt")
   "Regexp matching definition phrases.")
 
 (defun typerex-compute-normal-indent ()
@@ -2681,7 +2707,9 @@ Returns t iff skipped to indentation."
                       (string= matching-kwop "struct"))
                   (typerex-paren-or-indentation-indent))
                  ((or (string= matching-kwop "try")
-                      (string= matching-kwop "match"))
+                      (string= matching-kwop "try_lwt")
+                      (string= matching-kwop "match")
+                      (string= matching-kwop "match_lwt"))
                   (typerex-compute-kwop-indent-general kwop matching-kwop))
                  (t (goto-char old-point)
                     (typerex-compute-kwop-indent-general kwop matching-kwop))))
@@ -2700,6 +2728,7 @@ Returns t iff skipped to indentation."
                (and (string= kwop "end")
                     (typerex-editing-ls3)
                     (or (string= matching-kwop "match")
+                        (string= matching-kwop "match_lwt")
                         (string= matching-kwop "automaton")
                         (string= matching-kwop "present"))))
            (if (typerex-in-indentation-p)
@@ -2708,6 +2737,9 @@ Returns t iff skipped to indentation."
           ((string= kwop "in")
            (+ (current-column)
               (typerex-add-default-indent (string= matching-kwop "let"))))
+          ((string= kwop "in")
+           (+ (current-column)
+              (typerex-add-default-indent (string= matching-kwop "lwt"))))
           ((not (string= kwop "and")) ; pretty general case
            (typerex-compute-kwop-indent-general kwop matching-kwop))
           ((string= matching-kwop "with")
